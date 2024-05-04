@@ -24,7 +24,7 @@ const Navbar = () => {
   return (
     <div className='bg-black flex justify-between items-center h-24 px-4 text-white'>
       {/* Logo */}
-      <h1 className='w-full text-3xl font-bold text-[#00df9a]'>REACT.</h1>
+      <h1 className='w-full text-3xl font-bold text-[#00df9a]'>PLAYER1</h1>
 
       {/* Desktop Navigation */}
       <ul className='hidden md:flex w-1/6'>
