@@ -1,12 +1,12 @@
 import { createContext, useContext, FC, useState } from 'react';
 
-import { IProduct } from '../../models';
+import { Product } from '../../models';
 
 export interface IProductsContext {
   isFetching: boolean;
   setIsFetching(state: boolean): void;
-  products: IProduct[];
-  setProducts(products: IProduct[]): void;
+  products: Product[];
+  setProducts(products: Product[]): void;
   filters: string[];
   setFilters(filters: string[]): void;
 }
@@ -26,7 +26,7 @@ const useProductsContext = (): IProductsContext => {
 
 const ProductsProvider: FC = (props) => {
   const [isFetching, setIsFetching] = useState(false);
-  const [products, setProducts] = useState<IProduct[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [filters, setFilters] = useState<string[]>([]);
 
   const ProductContextValue: IProductsContext = {

@@ -1,21 +1,35 @@
 import axios from 'axios';
-import { IGetProductsResponse } from '../models';
+import { GetProductList, Product } from '../models';
 
 export const getProducts = async () => {
-  let response: IGetProductsResponse;
+  let response: GetProductList;
 
   response = await axios.get(
-    `https://api.printify.com/v1/shops/${process.env.REACT_APP_STORE_ID}/products.json`, {
+    `${process.env.REACT_APP_SERVER_URL}/products`, {
     headers: {
-      "Authorization": `Bearer ${process.env.REACT_APP_PRINTIFY_TOKEN}`,
       "Access-Control-Allow-Origin": "*",
       "Content-Type": "application/json"
     }
   }
-
   );
 
-  const { products } = response.data || [];
+  const { data } = response || [];
 
-  return products;
+  return data;
+};
+
+
+export const getProductById = async (productId: string) => {
+  let response: {data: Product};
+
+  response = await axios.get(
+    `${process.env.REACT_APP_SERVER_URL}/products/${productId}`, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": "application/json"
+    }
+  }
+  );
+
+  return response.data || [];
 };

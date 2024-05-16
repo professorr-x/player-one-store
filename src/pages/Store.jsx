@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react'
 import { useProducts } from '../contexts/products-context';
-import Product from './Product';
+import ProductCard from '../components/Products/ProductCard'
 
 function Store() {
     const { isFetching, products, fetchProducts } = useProducts();
@@ -11,10 +11,10 @@ function Store() {
     }, [fetchProducts]);
 
   return (
-    <div className='grid grid-flow-row-dense grid-cols-3 grid-rows-3'>
+    <div className='grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-3'>
         {isFetching && <h1> Loading </h1>}
-        {products?.map((p) => (
-        <Product product={p} key={p.sku} />
+        {products.data?.map((p) => (
+        <ProductCard product={p} key={p.id} />
       ))}
         
     </div>

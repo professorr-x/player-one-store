@@ -14,14 +14,14 @@ const useCartTotal = () => {
     );
 
     const totalPrice = products.reduce((sum: number, product: ICartProduct) => {
-      sum += product.price * product.quantity;
+      sum += 1 * product.quantity;
       return sum;
     }, 0);
 
     const installments = products.reduce(
       (greater: number, product: ICartProduct) => {
         greater =
-          product.installments > greater ? product.installments : greater;
+          1 > greater ? 1 : greater;
         return greater;
       },
       0
