@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback } from "react";
 
-import { useProductsContext } from './ProductsContextProvider';
-import { Product } from '../../models';
-import { getProducts } from '../../services/products';
+import { useProductsContext } from "./ProductsContextProvider";
+import { Product } from "../../models";
+import { getProducts } from "../../services/products";
 
 const useProducts = () => {
   const {
@@ -14,12 +14,16 @@ const useProducts = () => {
     setFilters,
   } = useProductsContext();
 
-  const fetchProducts = useCallback(() => {
-    setIsFetching(true);
-    getProducts().then(data => {
-      setIsFetching(false);
+  const fetchProducts = useCallback(async () => {
+    try {
+      setIsFetching(true);
+      const data = await getProducts();
       setProducts(data);
-    });
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setIsFetching(false);
+    }
   }, [setIsFetching, setProducts]);
 
   // const filterProducts = (filters: string[]) => {
