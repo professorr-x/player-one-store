@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { BsCart4 } from "react-icons/bs";
 import logoImage from "../../img/logo_transparent_white.png";
+import CartIcon from "../CartIcon/CartIcon";
+import CartWidget from "../CartWidget/CartWidget";
 
-const Navbar = () => {
+const Navbar = ({ setCartItems, cartItems }) => {
   // State to manage the navbar's visibility
   const [nav, setNav] = useState(false);
 
@@ -22,6 +24,48 @@ const Navbar = () => {
     { id: 5, text: "Contact" },
   ];
 
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  useEffect(() => {
+    const savedCartItems = JSON.parse(
+      localStorage.getItem("cartItems") || "[]"
+    );
+    setCartItems(savedCartItems);
+  }, [isCartOpen]);
+
+  const handleIncreaseQuantity = (id) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
+  };
+
+  const handleDecreaseQuantity = (id) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+    );
+  };
+
+  const handleRemoveItem = (id) => {
+    setCartItems((prevItems) => {
+      const updatedItems = prevItems.filter((item) => item.id !== id);
+      return updatedItems;
+    });
+  };
+
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  const toggleCart = () => {
+    setIsCartOpen(!isCartOpen);
+  };
+
   return (
     <div className="bg-black flex justify-between items-center h-24 px-4 text-white">
       {/* Logo */}
@@ -30,7 +74,7 @@ const Navbar = () => {
       </a>
 
       {/* Desktop Navigation */}
-      <ul className="flex md:w-1/6 w-full">
+      <ul className="flex items-center justify-end w-full gap-5">
         {/* {navItems.map(item => (
           <li
             key={item.id}
@@ -42,8 +86,8 @@ const Navbar = () => {
         <li>
           <WalletMultiButton />
         </li>
-        <li>
-          <BsCart4 />
+        <li className="cursor-pointer">
+          <CartIcon itemCount={cartItems?.length} onClick={toggleCart} />
         </li>
       </ul>
 
@@ -65,6 +109,15 @@ const Navbar = () => {
           <WalletMultiButton />
         </li>
       </ul> */}
+      {isCartOpen && (
+        <CartWidget
+          items={cartItems}
+          onIncrease={handleIncreaseQuantity}
+          onDecrease={handleDecreaseQuantity}
+          onRemove={handleRemoveItem}
+          onClose={toggleCart}
+        />
+      )}
     </div>
   );
 };
