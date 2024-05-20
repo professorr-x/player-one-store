@@ -26,9 +26,6 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [notAvailable, setNotAvailable] = useState<number[]>([]);
 
-  console.log("selectedVariant", selectedVariant);
-  console.log("product", product);
-
   useEffect(() => {
     const fetchProductById = async () => {
       if (id) {
@@ -213,7 +210,6 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   };
 
   const handleQuantityChange = (newQuantity: number) => {
-    console.log("New quantity:", newQuantity);
     setSelectedVariant((prev: any) => {
       return {
         ...prev,
@@ -224,7 +220,6 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
 
   // Cart
   const handleAddToCart = (newItem: any) => {
-    console.log("newItem", newItem);
     setCartItems((prevItems) => {
       const existingItem = prevItems?.find((item) => item?.id === newItem?.id);
       if (existingItem) {
@@ -238,13 +233,9 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     });
   };
 
-  console.log("cartItems", cartItems);
-
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
-
-  console.log();
 
   return (
     <div>
@@ -321,6 +312,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
                 </div>
                 <div className="mb-4">
                   <QuantityInput
+                    key={selectedVariant?.quantity}
                     initialQuantity={selectedVariant?.quantity}
                     onQuantityChange={handleQuantityChange}
                   />

@@ -5,6 +5,7 @@ import { BsCart4 } from "react-icons/bs";
 interface CartWidgetProps {
   items: Array<{
     id: string;
+    productId: string;
     title: string;
     size: string;
     price: number;
@@ -24,12 +25,19 @@ const CartWidget: React.FC<CartWidgetProps> = ({
   onRemove,
   onClose,
 }) => {
-  console.log("items", items);
-
   const total = items?.reduce(
     (acc, item) => acc + item?.price * item?.quantity,
     0
   );
+
+  const checkoutData:any = [];
+  for (let i = 0; i < items.length; i++) {
+    checkoutData?.push({
+      productId: items[i]?.productId,
+      variantID: items[i]?.id,
+      quantity: items[i]?.quantity,
+    });
+  }
 
   return (
     <div className="fixed z-20 inset-0 bg-gray-800 bg-opacity-75 flex justify-end">
@@ -46,7 +54,7 @@ const CartWidget: React.FC<CartWidgetProps> = ({
           <h2 className="text-white text-lg text-center">Cart</h2>
         </div>
         <button
-          className="text-gray-400 hover:text-gray-200 absolute right-4 top-4"
+          className="text-gray-400 text-3xl hover:text-gray-200 absolute right-4 top-3"
           onClick={onClose}
         >
           &times;
@@ -67,7 +75,10 @@ const CartWidget: React.FC<CartWidgetProps> = ({
             <span className="text-gray-400">Subtotal</span>
             <span className="text-yellow-500">${total.toFixed(2)}</span>
           </div>
-          <button className="w-full mt-4 py-2 border-2 border-yellow-500 text-white bg-zinc-950 rounded">
+          <button
+            onClick={() => console.log(checkoutData)}
+            className="w-full mt-4 py-2 border-2 border-yellow-500 text-white bg-zinc-950 rounded"
+          >
             CHECKOUT
           </button>
         </div>

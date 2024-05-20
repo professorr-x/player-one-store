@@ -26,7 +26,6 @@ const CartItem: React.FC<CartItemProps> = ({
   onRemove,
 }) => {
   const size1 = title?.split("/")?.pop()?.trim();
-  console.log("images", images);
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-700">
       <div className="flex items-center">

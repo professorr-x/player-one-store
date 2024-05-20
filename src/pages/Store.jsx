@@ -9,7 +9,6 @@ function Store() {
     fetchProducts();
     console.log(products);
   }, [fetchProducts]);
-  console.log("products", products);
   return (
     <div className="grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-3">
       {isFetching && <h1> Loading </h1>}

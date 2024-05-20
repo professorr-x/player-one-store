@@ -7,7 +7,6 @@ interface CartIconProps {
 }
 
 const CartIcon: React.FC<CartIconProps> = ({ itemCount, onClick }) => {
-  console.log("itemCount", itemCount);
 
   return (
     <div className="relative" onClick={onClick}>
