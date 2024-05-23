@@ -21,10 +21,10 @@ function ProductCard({ product }: IProps) {
                 <img className="p-8 rounded-t-lg" src={images[0].src} alt="product image" />
                 <div className="px-5 pb-5">
                     <a href="#">
-                        <h5 className="text-xl font-semibold tracking-tight text-gray-900">{title}</h5>
+                        <h5 className="text-xl tracking-tight text-gray-600">{title}</h5>
                     </a>
                     <div className="flex items-center justify-between">
-                        <span className="text-3xl font-bold text-gray-900e">$ {(variants[0].price) / 100}</span>
+                        <span className="text-xl font-bold text-purple-600">{variants[0].sol_price.toFixed(2)} SOL</span>
                     </div>
                 </div>
             </div>
