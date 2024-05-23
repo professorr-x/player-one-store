@@ -1,10 +1,23 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { useParams } from "react-router-dom";
 import { getProductById } from "../services/products";
 import { Product, ProductOptionValue, ProductVariants } from "../models";
 import placeholderImage from "../../src/img/placeholder.png";
+import QuantityInput from "../components/QuantityInput/QuantityInput";
+import CartWidget from "../components/CartWidget/CartWidget";
 
-function ProductPage() {
+interface cartItem {
+  cartItems: ProductVariants[];
+  setCartItems: Dispatch<SetStateAction<ProductVariants[]>>;
+}
+
+const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product>();
   const [selectedVariant, setSelectedVariant] = useState<ProductVariants>();
@@ -158,16 +171,17 @@ function ProductPage() {
     return sizeOptions.map((size, i) => {
       return (
         <button
+          disabled={notAvailable?.includes(size.id) ? true : false}
           key={size.id}
           id={size.id.toString()}
-          className={`bg-gray-300 text-gray-700 py-2 px-4 rounded-full font-bold mr-2 hover:bg-gray-400 relative overflow-hidden ${
+          className={`bg-gray-300 text-gray-700 py-2 px-4 rounded-full font-bold mr-2  relative overflow-hidden ${
             selectedOptions.includes(size.id)
               ? "border-2 border-black"
               : "border-none"
           } ${
             notAvailable?.includes(size?.id)
-              ? "before:w-[calc(100%-20px)] before:left-[10px] before:-translate-y-1/2 before:top-1/2 before:h-[1.5px] before:block before:absolute before:rotate-[-30deg] before:bg-black"
-              : ""
+              ? "before:w-[calc(100%-20px)] cursor-not-allowed opacity-80 before:left-[10px] before:-translate-y-1/2 before:top-1/2 before:h-[1.5px] before:block before:absolute before:rotate-[-30deg] before:bg-black"
+              : "hover:bg-gray-400 "
           }`}
           onClick={(e) => {
             handleOptionSelect(e, "size");
@@ -195,6 +209,34 @@ function ProductPage() {
     ));
   };
 
+  const handleQuantityChange = (newQuantity: number) => {
+    setSelectedVariant((prev: any) => {
+      return {
+        ...prev,
+        quantity: newQuantity,
+      };
+    });
+  };
+
+  // Cart
+  const handleAddToCart = (newItem: any) => {
+    setCartItems((prevItems) => {
+      const existingItem = prevItems?.find((item) => item?.id === newItem?.id);
+      if (existingItem) {
+        return prevItems?.map((item) =>
+          item?.id === newItem?.id
+            ? { ...item, quantity: item?.quantity + newItem?.quantity }
+            : item
+        );
+      }
+      return [...prevItems, newItem];
+    });
+  };
+
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
+
   return (
     <div>
       {selectedVariant && product && (
@@ -203,30 +245,42 @@ function ProductPage() {
             <div className="flex flex-col md:flex-row -mx-4">
               <div className="md:flex-1 px-4">
                 <div className="h-[460px] rounded-lg bg-gray-300 mb-4">
-                  {selectedVariant?.images[0]?.src ? (
-                    <img
-                      className="w-full h-full object-cover"
-                      src={selectedVariant?.images[0]?.src || ""}
-                      alt="Product Image"
-                    />
-                  ) : (
-                    <img
-                      src={placeholderImage}
-                      className="object-cover h-full w-full"
-                      alt="Placeholder"
-                    />
-                  )}
+                  <img
+                    className="w-full h-full object-cover"
+                    src={
+                      selectedVariant?.images[0]?.src
+                        ? selectedVariant?.images[0]?.src
+                        : product?.variants
+                            ?.filter(({ title }) =>
+                              title?.includes(
+                                selectedVariant?.title?.split("/")[0]
+                              )
+                            )
+                            ?.find(({ images }) => images?.length > 0)
+                            ?.images[0]?.src
+                    }
+                    alt="Product Image"
+                  />
                 </div>
                 <div className="-mx-2 mb-4">
                   <div className="px-2">
-                    <button
-                      disabled={notAvailable?.includes(selectedOptions[0])}
-                      className="w-full bg-gray-900 disabled:bg-[#7b7b7b] text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800"
-                    >
-                      {notAvailable?.includes(selectedOptions[0])
-                        ? "Sold Out"
-                        : "Add to Cart"}
-                    </button>
+                    {notAvailable?.includes(selectedOptions[0]) ? (
+                      <button
+                        disabled={notAvailable?.includes(selectedOptions[0])}
+                        className="w-full bg-gray-900 disabled:bg-[#7b7b7b] text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800"
+                      >
+                        Sold Out
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          handleAddToCart({ ...selectedVariant, productId: id })
+                        }
+                        className="w-full bg-gray-900 disabled:bg-[#7b7b7b] text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800"
+                      >
+                        Add to Cart
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -256,6 +310,13 @@ function ProductPage() {
                     </span>
                   </div>
                 </div>
+                <div className="mb-4">
+                  <QuantityInput
+                    key={selectedVariant?.quantity}
+                    initialQuantity={selectedVariant?.quantity}
+                    onQuantityChange={handleQuantityChange}
+                  />
+                </div>
                 {colorOptions.length > 0 && (
                   <div className="mb-4">
                     <span className="font-bold text-gray-700">
@@ -267,9 +328,11 @@ function ProductPage() {
                   </div>
                 )}
 
-                <div className="mb-4">
+                <div className="mb-4 ">
                   <span className="font-bold text-gray-700">Select Size:</span>
-                  <div className="flex items-center mt-2 ">{renderSizes()}</div>
+                  <div className="flex items-center mt-2 relative z-0">
+                    {renderSizes()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -278,6 +341,6 @@ function ProductPage() {
       )}
     </div>
   );
-}
+};
 
 export default ProductPage;
