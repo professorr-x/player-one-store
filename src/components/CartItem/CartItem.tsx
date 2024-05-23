@@ -5,6 +5,7 @@ interface CartItemProps {
   title: string;
   size: string;
   price: number;
+  sol_price: number;
   quantity: number;
   images: {
     src: string;
@@ -19,6 +20,7 @@ const CartItem: React.FC<CartItemProps> = ({
   title = "",
   size = "",
   price = 0,
+  sol_price = 0,
   quantity = 0,
   images = [],
   onIncrease,
@@ -45,7 +47,7 @@ const CartItem: React.FC<CartItemProps> = ({
             &times;
           </button>
         </div>
-        <div className="text-yellow-500">${price?.toFixed(2)}</div>
+        <div className="text-yellow-500">{sol_price?.toFixed(2)} SOL</div>
         <div className="flex items-center space-x-1">
           <button
             disabled={quantity > 1 ? false : true}

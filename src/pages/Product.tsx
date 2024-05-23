@@ -295,15 +295,15 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
                 <div className="flex mb-4">
                   <div className="mr-4">
                     <span className="font-bold text-gray-700 ">Price:</span>
-                    <span className="text-gray-600 ">
-                      ${selectedVariant.price}
+                    <span className="text-gray-600 m-2">
+                      {(selectedVariant.sol_price).toFixed(2)} SOL
                     </span>
                   </div>
                   <div>
                     <span className="font-bold text-gray-700 ">
                       Availability:
                     </span>
-                    <span className="text-gray-600 ">
+                    <span className="text-gray-600 m-2">
                       {notAvailable?.includes(selectedOptions[0])
                         ? "Out Of Stock"
                         : "In Stock"}

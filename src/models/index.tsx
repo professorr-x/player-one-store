@@ -30,6 +30,7 @@ export interface ProductVariants {
   sku: number;
   cost: number;
   price: number;
+  sol_price: number;
   title: string;
   is_available: boolean;
   is_default: boolean;

@@ -9,6 +9,7 @@ interface CartWidgetProps {
     title: string;
     size: string;
     price: number;
+    sol_price: number;
     quantity: number;
     images: [];
   }>;
@@ -26,7 +27,7 @@ const CartWidget: React.FC<CartWidgetProps> = ({
   onClose,
 }) => {
   const total = items?.reduce(
-    (acc, item) => acc + item?.price * item?.quantity,
+    (acc, item) => acc + item?.sol_price * item?.quantity,
     0
   );
 
@@ -73,7 +74,7 @@ const CartWidget: React.FC<CartWidgetProps> = ({
         <div className="p-4 py-8 border-t shadow-2xl shadow-black overflow-hidden border-gray-700">
           <div className="flex justify-between items-center">
             <span className="text-gray-400">Subtotal</span>
-            <span className="text-yellow-500">${total.toFixed(2)}</span>
+            <span className="text-yellow-500">{total.toFixed(2)} SOL</span>
           </div>
           <button
             onClick={() => console.log(checkoutData)}
