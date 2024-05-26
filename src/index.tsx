@@ -5,6 +5,8 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { ProductsProvider } from './contexts/products-context';
 import { CartProvider } from './contexts/cart-context';
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 ReactDOM.render(
     <React.StrictMode>
