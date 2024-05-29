@@ -5,6 +5,7 @@ import Store from "./pages/Store";
 import ProductPage from "./pages/Product";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ProductVariants } from "./models";
+import CheckoutPage from "./pages/Checkout";
 
 require("./App.css");
 
@@ -20,6 +21,12 @@ const App: FC = () => {
             path="/products/:id"
             element={
               <ProductPage setCartItems={setCartItems} cartItems={cartItems} />
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <CheckoutPage  />
             }
           />
         </Routes>

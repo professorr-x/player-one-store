@@ -9,9 +9,7 @@ import React, {
 import { useParams } from "react-router-dom";
 import { getProductById } from "../services/products";
 import { Product, ProductOptionValue, ProductVariants } from "../models";
-import placeholderImage from "../../src/img/placeholder.png";
 import QuantityInput from "../components/QuantityInput/QuantityInput";
-import CartWidget from "../components/CartWidget/CartWidget";
 import loadingSpinner from "./../img/loading.gif";
 import Slider from "react-slick";
 
@@ -288,7 +286,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     prevArrow: <SamplePrevArrow />,
     nextArrow: <SampleNextArrow />,
   };
-
+  
   return (
     <div>
       {selectedVariant && product ? (

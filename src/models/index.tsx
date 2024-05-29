@@ -66,3 +66,16 @@ export interface GetProductList {
   current_page: number;
   data: Product[];
 }
+
+export interface CheckoutFormData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  address1: string;
+  address2: string;
+  city: string;
+  country: string
+  region: string
+  zip: string
+}
