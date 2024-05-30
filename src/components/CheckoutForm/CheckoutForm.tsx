@@ -90,7 +90,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
       if (error instanceof Error) {
         errors.push(error.message);
         console.log(errors);
-        setValidationMessage("Error Confirming Order, Try Again");
+        setValidationMessage(errors[0] || "Error Confirming Order, Try Again");
       }
     }
   }, [publicKey, sendTransaction, connection]);
