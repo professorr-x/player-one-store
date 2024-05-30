@@ -1,14 +1,33 @@
-import React, { useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import Step1 from "./FormSteps/Step1";
 import Step2 from "./FormSteps/Step2";
 import Step3 from "./FormSteps/Step3";
 import Step4 from "./FormSteps/Step4";
 import axios from "axios";
-import { CheckoutFormData } from "../../models";
+import { CheckoutFormData, ProductVariants, Response } from "../../models";
 import loadingSpinner from "../../img/loading.gif";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import {
+  PublicKey,
+  Transaction,
+  LAMPORTS_PER_SOL,
+  SystemProgram,
+} from "@solana/web3.js";
+import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
+import { useNavigate } from "react-router-dom";
 
+interface cartItem {
+  cartItems: ProductVariants[];
+  setCartItems: Dispatch<SetStateAction<ProductVariants[]>>;
+}
 
-const CheckoutForm = () => {
+const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   const steps = [1, 2, 3, 4];
   const [formData, setFormData] = useState<CheckoutFormData>({
     first_name: "",
@@ -25,8 +44,64 @@ const CheckoutForm = () => {
   const [step, setStep] = useState(1);
   const [validationMessage, setValidationMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkoutItems, setCheckoutItems] = useState([]);
+  const [response, setResponse] = useState<Response>();
+  const { connection } = useConnection();
+  const { publicKey, sendTransaction } = useWallet();
+  const navigate = useNavigate();
 
-  console.log("formData", formData);
+  const handleSolanaPay = useCallback(async () => {
+    let errors: string[] = [];
+    if (!publicKey) {
+      errors.push("Wallet not connected");
+      throw new WalletNotConnectedError();
+    }
+    let total_lamports = LAMPORTS_PER_SOL * 1.0;
+    console.log("connection", connection);
+
+    connection.getBalance(publicKey).then((bal): any => {
+      console.log("bal", bal);
+      if (bal < total_lamports) {
+        errors.push("Insufficient Funds");
+      }
+    });
+    console.log("publicKey.toBase58()", publicKey.toBase58());
+    try {
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: publicKey,
+          toPubkey: new PublicKey(
+            "3vZHGfiYceHgurCX8ySf9u1hroEq4hhntNhVp8dBYsXL"
+          ),
+          lamports: total_lamports,
+        })
+      );
+
+      console.log(transaction);
+
+      const signature = await sendTransaction(transaction, connection);
+
+      await connection.confirmTransaction(signature, "processed");
+      console.log(signature);
+      let status = await connection.getSignatureStatus(signature);
+      console.log(status);
+      setStep(step + 1);
+    } catch (error) {
+      if (error instanceof Error) {
+        errors.push(error.message);
+        console.log(errors);
+        setValidationMessage("Error Confirming Order, Try Again");
+      }
+    }
+  }, [publicKey, sendTransaction, connection]);
+
+  console.log("cartItems", cartItems);
+
+  useEffect(() => {
+    const itemsInCart = JSON.parse(localStorage.getItem("checkout") || "[]");
+
+    setCheckoutItems(itemsInCart);
+  }, [cartItems]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,7 +130,7 @@ const CheckoutForm = () => {
           />
         );
       case 3:
-        return <Step3 />;
+        return <Step3 checkoutData={cartItems} response={response} />;
       case 4:
         return <Step4 />;
       default:
@@ -68,6 +143,7 @@ const CheckoutForm = () => {
         );
     }
   };
+
 
   const handleNext = async () => {
     if (
@@ -89,13 +165,7 @@ const CheckoutForm = () => {
       setLoading(true);
       try {
         const data = {
-          line_items: [
-            {
-              product_id: "665385475eed34c9370c9a2e",
-              variant_id: 78993,
-              quantity: 1,
-            },
-          ],
+          line_items: checkoutItems,
           shipping_method: 1,
           is_printify_express: false,
           is_economy_shipping: false,
@@ -114,6 +184,7 @@ const CheckoutForm = () => {
           }
         );
         console.log("Response:", response.data);
+        setResponse(response.data);
       } catch (error) {
         console.error("Error:", error);
       } finally {
@@ -121,7 +192,17 @@ const CheckoutForm = () => {
       }
       setValidationMessage("");
       setStep(step + 1);
-
+    } else if (step === 3) {
+      setLoading(true);
+      try {
+        await handleSolanaPay();
+      } catch (error) {
+        console.error("Payment error:", error);
+      } finally {
+        setLoading(false);
+      }
+    } else if (step === 4) {
+      navigate("/");
     } else {
       setValidationMessage("Please Fill all Fields to proceed");
     }
@@ -129,11 +210,12 @@ const CheckoutForm = () => {
   const handleback = () => {
     if (step > 1) {
       setStep(step - 1);
+      setValidationMessage("");
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 my-24">
+    <div className="max-w-3xl mx-auto px-4 mt-40 mb-20">
       <div className="flex items-center justify-between relative">
         <div className="h-1 w-full absolute top-1/2 right-0 mx-auto bg-[#5e17eb] z-[-1]" />
         {steps?.map((node, i) => {
@@ -171,7 +253,7 @@ const CheckoutForm = () => {
           <div className="w-full flex justify-between items-center">
             <button
               onClick={handleback}
-              disabled={step === 1}
+              disabled={step < 2}
               className={`bg-[#5e17eb] rounded-lg text-white w-full max-w-52 px-4 py-3 text-lg font-medium  ${
                 step === 1
                   ? "opacity-50 cursor-not-allowed"
@@ -183,9 +265,13 @@ const CheckoutForm = () => {
             <button
               onClick={handleNext}
               type="submit"
-              className="bg-[#5e17eb] rounded-lg text-white w-full max-w-52 px-4 py-3 text-lg font-medium hover:opacity-90"
+              className={` rounded-lg  w-full max-w-52 px-4 py-3 text-lg font-medium hover:opacity-90 ${
+                step === 3
+                  ? "bg-yellow-300 text-gray-950 border border-gray-950"
+                  : "bg-[#5e17eb] text-white"
+              }`}
             >
-              Next
+              {step === 3 ? "Pay" : step === 4 ? "Continue Shopping" : "Next"}
             </button>
           </div>
         </div>

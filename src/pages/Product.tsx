@@ -286,7 +286,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     prevArrow: <SamplePrevArrow />,
     nextArrow: <SampleNextArrow />,
   };
-  
+
   return (
     <div>
       {selectedVariant && product ? (

@@ -75,7 +75,14 @@ export interface CheckoutFormData {
   address1: string;
   address2: string;
   city: string;
-  country: string
-  region: string
-  zip: string
+  country: string;
+  region: string;
+  zip: string;
+}
+
+export interface Response {
+  order_id: string;
+  total_price: number;
+  total_shipping: number;
+  total_tax: number;
 }

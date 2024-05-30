@@ -66,6 +66,8 @@ const Navbar = ({ setCartItems, cartItems }) => {
     setIsCartOpen(!isCartOpen);
   };
 
+  console.log('isCartOpen', isCartOpen);
+
   return (
     <div className="bg-black flex justify-between items-center h-24 px-4 text-white">
       {/* Logo */}

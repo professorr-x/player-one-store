@@ -26,7 +26,7 @@ const App: FC = () => {
           <Route
             path="/checkout"
             element={
-              <CheckoutPage  />
+              <CheckoutPage setCartItems={setCartItems} cartItems={cartItems}  />
             }
           />
         </Routes>
