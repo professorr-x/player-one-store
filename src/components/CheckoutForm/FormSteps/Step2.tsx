@@ -30,8 +30,10 @@ const Step2: React.FC<FormComponentProps> = ({
   setFormData,
   handleChange,
 }) => {
+
+
+
   const handlePlaceSelected = (place: PlaceResult) => {
-    console.log(place);
     if (place?.address_components) {
       const countryTypes = place?.address_components?.find((node) =>
         node?.types?.includes("country")
@@ -50,14 +52,6 @@ const Step2: React.FC<FormComponentProps> = ({
         place?.address_components?.find((node) =>
           node?.types?.includes("political")
         );
-      console.log(
-        "region",
-        place?.address_components?.find(
-          (node) =>
-            node?.types?.includes("administrative_area_level_1") ||
-            node?.types?.includes("political")
-        )
-      );
 
       setFormData((prevFormData) => ({
         ...prevFormData,
@@ -98,7 +92,7 @@ const Step2: React.FC<FormComponentProps> = ({
               onPlaceSelected={handlePlaceSelected}
               style={{ width: "100%" }}
               options={{
-                types: ["(regions)"],
+                types: ["(cities)"],
               }}
             />
             <ReactGoogleAutocomplete

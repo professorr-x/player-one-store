@@ -28,7 +28,7 @@ const Step3: React.FC<CheckoutItems> = ({ checkoutData, response }) => {
                   key={i}
                   className="flex items-center justify-between p-4 border-b border-gray-700"
                 >
-                  <div className="w-[20%]">
+                  <div className="sm:w-[20%] w-[50%]">
                     {node?.images && (
                       <img
                         className="w-full max-w-[200px]"
@@ -38,11 +38,11 @@ const Step3: React.FC<CheckoutItems> = ({ checkoutData, response }) => {
                     )}
                   </div>
                   <div className="flex flex-col text-right gap-1">
-                    <p className="text-gray-400 text-xl">{node?.title}</p>
-                    <p className="text-gray-400 text-xl">
+                    <p className="text-gray-400 sm:text-xl text-sm">{node?.title}</p>
+                    <p className="text-gray-400 sm:text-xl text-sm">
                       Quantity: {node?.quantity}
                     </p>
-                    <p className="text-yellow-500 text-xl">
+                    <p className="text-yellow-500 sm:text-xl text-sm">
                       {node?.sol_price?.toFixed(2)} SOL
                     </p>
                   </div>

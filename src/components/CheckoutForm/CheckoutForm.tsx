@@ -41,7 +41,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     region: "",
     zip: "",
   });
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(3);
   const [validationMessage, setValidationMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState([]);
@@ -50,52 +50,70 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   const { publicKey, sendTransaction } = useWallet();
   const navigate = useNavigate();
 
-  const handleSolanaPay = useCallback(async () => {
-    let errors: string[] = [];
-    if (!publicKey) {
-      errors.push("Wallet not connected");
-      throw new WalletNotConnectedError();
-    }
-    let total_lamports = LAMPORTS_PER_SOL * 1.0;
-    console.log("connection", connection);
-
-    connection.getBalance(publicKey).then((bal): any => {
-      console.log("bal", bal);
-      if (bal < total_lamports) {
-        errors.push("Insufficient Funds");
+  const handleSolanaPay = useCallback(
+    async (response: Response) => {
+      let errors: string[] = [];
+      if (!publicKey) {
+        errors.push("Wallet not connected");
+        throw new WalletNotConnectedError();
       }
-    });
-    console.log("publicKey.toBase58()", publicKey.toBase58());
-    try {
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: publicKey,
-          toPubkey: new PublicKey(
-            "3vZHGfiYceHgurCX8ySf9u1hroEq4hhntNhVp8dBYsXL"
-          ),
-          lamports: total_lamports,
-        })
-      );
+      let total_lamports = LAMPORTS_PER_SOL * 1.0;
 
-      console.log(transaction);
+      connection.getBalance(publicKey).then((bal): any => {
+        if (bal < total_lamports) {
+          errors.push("Insufficient Funds");
+        }
+      });
+      try {
+        const transaction = new Transaction().add(
+          SystemProgram.transfer({
+            fromPubkey: publicKey,
+            toPubkey: new PublicKey(
+              "3vZHGfiYceHgurCX8ySf9u1hroEq4hhntNhVp8dBYsXL"
+            ),
+            lamports: total_lamports,
+          })
+        );
 
-      const signature = await sendTransaction(transaction, connection);
+        const signature = await sendTransaction(transaction, connection);
 
-      await connection.confirmTransaction(signature, "processed");
-      console.log(signature);
-      let status = await connection.getSignatureStatus(signature);
-      console.log(status);
-      setStep(step + 1);
-    } catch (error) {
-      if (error instanceof Error) {
-        errors.push(error.message);
-        console.log(errors);
-        setValidationMessage(errors[0] || "Error Confirming Order, Try Again");
+        await connection.confirmTransaction(signature, "processed");
+        let status = await connection.getSignatureStatus(signature);
+        const postData = {
+          order_id: response?.order_id,
+          wallet_address: publicKey.toBase58(),
+          signature: signature,
+        };
+
+        const res = await axios.post(
+          `${process.env.REACT_APP_SERVER_URL}/order/confirm`,
+          null,
+          {
+            params: postData,
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
+        );
+        if (res?.status === 200) {
+          setStep(step + 1);
+          setCartItems([]);
+          localStorage.removeItem("checkout");
+          localStorage.removeItem("cartItems");
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          errors.push(error.message);
+          console.log(errors);
+          setValidationMessage(
+            errors[0] || "Error Confirming Order, Try Again"
+          );
+        }
       }
-    }
-  }, [publicKey, sendTransaction, connection]);
-
-  console.log("cartItems", cartItems);
+    },
+    [publicKey, sendTransaction, connection]
+  );
 
   useEffect(() => {
     const itemsInCart = JSON.parse(localStorage.getItem("checkout") || "[]");
@@ -144,7 +162,6 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     }
   };
 
-
   const handleNext = async () => {
     if (
       step === 1 &&
@@ -158,8 +175,8 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     } else if (
       step === 2 &&
       formData?.address1 &&
-      formData?.country &&
       formData?.city &&
+      formData?.country &&
       formData?.zip
     ) {
       setLoading(true);
@@ -195,9 +212,14 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     } else if (step === 3) {
       setLoading(true);
       try {
-        await handleSolanaPay();
+        if (response) {
+          await handleSolanaPay(response);
+        }
       } catch (error) {
         console.error("Payment error:", error);
+        setValidationMessage(
+          "Wallet Not Connected, Please Connect your Wallet to Proceed"
+        );
       } finally {
         setLoading(false);
       }
@@ -222,7 +244,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
           return (
             <div
               key={i}
-              className={`w-20 h-20 rounded-full   flex items-center justify-center text-2xl font-semibold ${
+              className={`sm:w-20 sm:h-20 h-14 w-14 rounded-full   flex items-center justify-center text-2xl font-semibold ${
                 step === node
                   ? "bg-yellow-400 text-white"
                   : "bg-[#5e17eb] text-white"
@@ -234,7 +256,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
         })}
       </div>
       {loading ? (
-        <div className="w-full flex justify-center items-center absolute top-[55%] -translate-y-1/2 -translate-x-1/2 left-1/2">
+        <div className="w-full flex justify-center items-center mt-32">
           <img
             height={100}
             width={100}
@@ -250,7 +272,11 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
               {validationMessage}
             </p>
           )}
-          <div className="w-full flex justify-between items-center">
+          <div
+            className={`w-full flex sm:flex-row flex-col gap-3 items-center ${
+              step === 4 ? "justify-center" : "justify-between"
+            }`}
+          >
             <button
               onClick={handleback}
               disabled={step < 2}
@@ -258,7 +284,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
                 step === 1
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:opacity-90"
-              }`}
+              } ${step === 4 ? "hidden" : "block"}`}
             >
               Back
             </button>
