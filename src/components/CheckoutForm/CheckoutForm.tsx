@@ -41,7 +41,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     region: "",
     zip: "",
   });
-  const [step, setStep] = useState(3);
+  const [step, setStep] = useState(1);
   const [validationMessage, setValidationMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState([]);
@@ -226,7 +226,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     } else if (step === 4) {
       navigate("/");
     } else {
-      setValidationMessage("Please Fill all Fields to proceed");
+      setValidationMessage("Please fill all fields to proceed");
     }
   };
   const handleback = () => {
