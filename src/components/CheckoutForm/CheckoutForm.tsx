@@ -21,6 +21,7 @@ import {
 } from "@solana/web3.js";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import { useNavigate } from "react-router-dom";
+import { calculateTotalCost } from "../../utils";
 
 interface cartItem {
   cartItems: ProductVariants[];
@@ -57,7 +58,8 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
         errors.push("Wallet not connected");
         throw new WalletNotConnectedError();
       }
-      let total_lamports = LAMPORTS_PER_SOL * 1.0;
+      let total_lamports =
+        LAMPORTS_PER_SOL * calculateTotalCost(response).toFixed(2);
 
       connection.getBalance(publicKey).then((bal): any => {
         if (bal < total_lamports) {
@@ -150,7 +152,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
       case 3:
         return <Step3 checkoutData={cartItems} response={response} />;
       case 4:
-        return <Step4 />;
+        return <Step4 response={response} />;
       default:
         return (
           <Step1

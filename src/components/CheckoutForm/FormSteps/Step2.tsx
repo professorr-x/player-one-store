@@ -31,9 +31,8 @@ const Step2: React.FC<FormComponentProps> = ({
   handleChange,
 }) => {
 
-
-
   const handlePlaceSelected = (place: PlaceResult) => {
+
     if (place?.address_components) {
       const countryTypes = place?.address_components?.find((node) =>
         node?.types?.includes("country")
@@ -53,12 +52,27 @@ const Step2: React.FC<FormComponentProps> = ({
           node?.types?.includes("political")
         );
 
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        city: cityTypes?.long_name || "",
-        region: regionTypes?.long_name || "",
-        country: countryTypes?.long_name || "",
-      }));
+      if (place) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          address1: place?.formatted_address || "",
+          city: cityTypes?.long_name || "",
+          region: regionTypes?.long_name || "",
+          country: countryTypes?.long_name || "",
+        }));
+      }
+    }
+  };
+  const handleAddressed2 = (place: PlaceResult) => {
+    console.log(place);
+
+    if (place?.address_components) {
+      if (place) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          address2: place?.formatted_address || "",
+        }));
+      }
     }
   };
 
@@ -68,28 +82,32 @@ const Step2: React.FC<FormComponentProps> = ({
         Shipping Details
         <form className="mt-5">
           <div className="flex flex-col gap-5">
-            <Input
-              name="address1"
-              placeholder="Address 1"
-              type="text"
-              required
-              value={formData?.address1 || ""}
-              otherClasses=" max-w-sm mx-auto"
-              onChange={handleChange}
-            />
-            <Input
-              name="address2"
-              placeholder="Address 2"
-              type="text"
-              value={formData?.address2 || ""}
-              otherClasses=" max-w-sm mx-auto"
-              onChange={handleChange}
-            />
             <ReactGoogleAutocomplete
-              placeholder="City"
+              placeholder="Address 1"
               className="w-full py-[12px] flex rounded-lg border-[1px] border-gray-300 bg-gray-50 px-4 text-base outline outline-[3px] outline-transparent focus:border-green-600 focus:outline-green-600/30 placeholder:text-gray-500 max-w-sm mx-auto"
               apiKey={process.env.REACT_APP_GOOGLE_AUTOCOMPLETE_API_KEY}
               onPlaceSelected={handlePlaceSelected}
+              style={{ width: "100%" }}
+              options={{
+                types: ["establishment", "geocode"],
+                fields: ["address_components", "formatted_address", "geometry", "icon", "name"],
+              }}
+            />
+            <ReactGoogleAutocomplete
+              placeholder="Address 2"
+              className="w-full py-[12px] flex rounded-lg border-[1px] border-gray-300 bg-gray-50 px-4 text-base outline outline-[3px] outline-transparent focus:border-green-600 focus:outline-green-600/30 placeholder:text-gray-500 max-w-sm mx-auto"
+              apiKey={process.env.REACT_APP_GOOGLE_AUTOCOMPLETE_API_KEY}
+              onPlaceSelected={handleAddressed2}
+              style={{ width: "100%" }}
+              options={{
+                types: ["establishment", "geocode"],
+              }}
+            />
+            <ReactGoogleAutocomplete
+              defaultValue={formData?.city}
+              placeholder="City"
+              className="w-full py-[12px] flex rounded-lg border-[1px] border-gray-300 bg-gray-50 px-4 text-base outline outline-[3px] outline-transparent focus:border-green-600 focus:outline-green-600/30 placeholder:text-gray-500 max-w-sm mx-auto"
+              apiKey={process.env.REACT_APP_GOOGLE_AUTOCOMPLETE_API_KEY}
               style={{ width: "100%" }}
               options={{
                 types: ["(cities)"],
