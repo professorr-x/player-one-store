@@ -6,29 +6,126 @@ import React, {
   SetStateAction,
   useRef,
 } from "react";
+import * as buffer from "buffer";
 import { useParams } from "react-router-dom";
 import { getProductById } from "../services/products";
 import { Product, ProductOptionValue, ProductVariants } from "../models";
-import placeholderImage from "../../src/img/placeholder.png";
 import QuantityInput from "../components/QuantityInput/QuantityInput";
-import CartWidget from "../components/CartWidget/CartWidget";
 import loadingSpinner from "./../img/loading.gif";
 import Slider from "react-slick";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey, VersionedTransaction, TransactionMessage } from '@solana/web3.js';
 
-interface cartItem {
-  cartItems: ProductVariants[];
-  setCartItems: Dispatch<SetStateAction<ProductVariants[]>>;
-}
+// interface cartItem {
+//   cartItems: ProductVariants[];
+//   setCartItems: Dispatch<SetStateAction<ProductVariants[]>>;
+// }
 
-const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
-  const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product>();
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariants>();
-  const [sizeOptions, setSizeOptions] = useState<ProductOptionValue[]>([]);
-  const [colorOptions, setColorOptions] = useState<ProductOptionValue[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
-  const [notAvailable, setNotAvailable] = useState<number[]>([]);
-  const [toggle, setToggle] = useState<boolean>(false);
+window.Buffer = buffer.Buffer;
+
+
+const ProductPage = ({ setCartItems, cartItems }) => {
+  const { id } = useParams();
+  const [product, setProduct] = useState();
+  const [selectedVariant, setSelectedVariant] = useState();
+  const [sizeOptions, setSizeOptions] = useState([]);
+  const [colorOptions, setColorOptions] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [notAvailable, setNotAvailable] = useState([]);
+  const [toggle, setToggle] = useState(false);
+  const { publicKey, sendTransaction, signTransaction } = useWallet();
+  const { connection } = useConnection();
+
+  const handlePay = useCallback(
+    async (response) => {
+      let errors = [];
+      if (!publicKey) {
+        errors.push("Wallet not connected");
+      }
+      
+      // let minRent = await connection.getMinimumBalanceForRentExemption(0);
+      
+      // let blockhash = await connection
+      //   .getLatestBlockhash()
+      //   .then((res) => res.blockhash);
+
+        
+
+      let total_lamports = LAMPORTS_PER_SOL * 0.1
+      
+
+      // const instructions = [
+      //   SystemProgram.transfer({
+      //     fromPubkey: publicKey,
+      //     toPubkey: new PublicKey(
+      //       "3vZHGfiYceHgurCX8ySf9u1hroEq4hhntNhVp8dBYsXL"
+      //     ),
+      //     lamports: total_lamports,
+      //   }),
+      // ];
+      // console.log(instructions)
+
+      // const messageV0 = new TransactionMessage({
+      //   payerKey: publicKey,
+      //   recentBlockhash: blockhash,
+      //   instructions,
+      // }).compileToV0Message();
+
+      connection.getBalance(publicKey).then((bal) => {
+        if (bal < total_lamports) {
+          errors.push("Insufficient Funds");
+        }
+      });
+      try {
+        const transaction = new Transaction().add(
+          SystemProgram.transfer({
+            fromPubkey: publicKey,
+            toPubkey: new PublicKey(
+              "3vZHGfiYceHgurCX8ySf9u1hroEq4hhntNhVp8dBYsXL"
+            ),
+            lamports: total_lamports,
+          })
+        );
+
+        const signature = await sendTransaction(transaction, connection);
+
+        await connection.confirmTransaction(signature, "processed");
+        // const transaction = new VersionedTransaction(messageV0);
+        // const signed = signTransaction(transaction);
+        // await connection.sendTransaction(transaction);
+        // console.log("SIGNED", signed)
+        let status = await connection.getSignatureStatus(signature);
+        const postData = {
+          order_id: response?.order_id,
+          wallet_address: publicKey.toBase58(),
+          signature: signature,
+        };
+
+        console.log(signature)
+
+        // const res = await axios.post(
+        //   `${process.env.REACT_APP_SERVER_URL}/order/confirm`,
+        //   null,
+        //   {
+        //     params: postData,
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       "Access-Control-Allow-Origin": "*",
+        //     },
+        //   }
+        // );
+        // if (res?.status === 200) {
+        //   console.log("COMPLETE")
+        // }
+      } catch (error) {
+        if (error instanceof Error) {
+          errors.push(error.message);
+          console.log(errors);
+        }
+      }
+    },
+    [publicKey, sendTransaction, connection]
+  );
 
   useEffect(() => {
     const fetchProductById = async () => {
@@ -38,8 +135,8 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
 
           setProduct(data);
           if (data) {
-            const colors: ProductOptionValue[] = [];
-            const sizes: ProductOptionValue[] = [];
+            const colors = [];
+            const sizes = [];
 
             data.options.forEach((option) => {
               if (option.type === "color") {
@@ -90,7 +187,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
                       );
                   })
                   .filter(
-                    (size): size is ProductOptionValue => size !== undefined
+                    (size) => size !== undefined
                   );
 
                 setSizeOptions(availableSizes || []);
@@ -107,7 +204,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   }, [id]);
 
   const handleOptionSelect = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>, type: string) => {
+    (e, type) => {
       const optionId = parseInt(e.currentTarget.id);
       let newSelectedOptions = [...selectedOptions];
 
@@ -129,7 +226,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
               .find((option) => option.type === "size")
               ?.values.find((size) => variant.options.includes(size.id));
           })
-          .filter((size): size is ProductOptionValue => size !== undefined);
+          .filter((size) => size !== undefined);
         const latestsize = availableSizes?.filter((node) => {
           const id = node.id;
           return product?.variants?.filter(
@@ -178,15 +275,13 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
           disabled={notAvailable?.includes(size.id) ? true : false}
           key={size.id}
           id={size.id.toString()}
-          className={`bg-gray-300 text-gray-700 py-2 px-4 rounded-full font-bold mr-2  relative overflow-hidden ${
-            selectedOptions.includes(size.id)
-              ? "border-2 border-black"
-              : "border-none"
-          } ${
-            notAvailable?.includes(size?.id)
+          className={`bg-gray-300 text-gray-700 py-2 px-4 rounded-full font-bold mr-2  relative overflow-hidden ${selectedOptions.includes(size.id)
+            ? "border-2 border-black"
+            : "border-none"
+            } ${notAvailable?.includes(size?.id)
               ? "before:w-[calc(100%-20px)] cursor-not-allowed opacity-80 before:left-[10px] before:-translate-y-1/2 before:top-1/2 before:h-[1.5px] before:block before:absolute before:rotate-[-30deg] before:bg-black"
               : "hover:bg-gray-400 "
-          }`}
+            }`}
           onClick={(e) => {
             handleOptionSelect(e, "size");
           }}
@@ -202,19 +297,18 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
       <button
         key={color.id}
         id={color.id.toString()}
-        style={{ backgroundColor: color.colors![0] }}
-        className={`w-6 h-6 rounded-full bg-[${color.colors![0]}] mr-2 ${
-          selectedOptions.includes(color.id)
-            ? "border-2 border-black"
-            : "border-none"
-        }`}
+        style={{ backgroundColor: color.colors[0] }}
+        className={`w-6 h-6 rounded-full bg-[${color.colors[0]}] mr-2 ${selectedOptions.includes(color.id)
+          ? "border-2 border-black"
+          : "border-none"
+          }`}
         onClick={(e) => handleOptionSelect(e, "color")}
       ></button>
     ));
   };
 
-  const handleQuantityChange = (newQuantity: number) => {
-    setSelectedVariant((prev: any) => {
+  const handleQuantityChange = (newQuantity) => {
+    setSelectedVariant((prev) => {
       return {
         ...prev,
         quantity: newQuantity,
@@ -223,7 +317,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   };
 
   // Cart
-  const handleAddToCart = (newItem: any) => {
+  const handleAddToCart = (newItem) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems?.find((item) => item?.id === newItem?.id);
       if (existingItem) {
@@ -255,8 +349,8 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   ];
   const imageUrls = images?.map((image) => image?.src);
 
-  function SampleNextArrow(props: any) {
-    const {onClick } = props;
+  function SampleNextArrow(props) {
+    const { onClick } = props;
     return (
       <div
         className={`absolute top-1/2 right-0 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 z-10`}
@@ -267,7 +361,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     );
   }
 
-  function SamplePrevArrow(props: any) {
+  function SamplePrevArrow(props) {
     const { onClick } = props;
     return (
       <div
@@ -320,9 +414,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
                       </button>
                     ) : (
                       <button
-                        onClick={() =>
-                          handleAddToCart({ ...selectedVariant, productId: id })
-                        }
+                        onClick={handlePay}
                         className="w-full bg-gray-900 disabled:bg-[#7b7b7b] text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800"
                       >
                         Add to Cart
@@ -387,11 +479,10 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
                       </span>
                     </button>
                     <p
-                      className={`text-gray-600 text-sm text-left transition-all duration-200 ease-linear ${
-                        toggle
-                          ? "h-auto opacity-100 mt-3 border-b border-gray-500 pb-4"
-                          : "h-0 pointer-events-none opacity-0 mt-0 border-none"
-                      }`}
+                      className={`text-gray-600 text-sm text-left transition-all duration-200 ease-linear ${toggle
+                        ? "h-auto opacity-100 mt-3 border-b border-gray-500 pb-4"
+                        : "h-0 pointer-events-none opacity-0 mt-0 border-none"
+                        }`}
                       dangerouslySetInnerHTML={{
                         __html: product?.description,
                       }}
