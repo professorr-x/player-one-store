@@ -11,7 +11,7 @@ const Step4: React.FC<step4Props> = ({ response }) => {
         Order#: {response?.order_id}
       </p>
       <p className="text-3xl text-gray-950 text-center mb-6 font-semibold">
-        Thank you For Submiting your order
+        Thank you for shopping with us!
       </p>
     </div>
   );

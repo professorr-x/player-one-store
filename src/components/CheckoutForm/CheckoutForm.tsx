@@ -114,7 +114,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
         }
       }
     },
-    [publicKey, sendTransaction, connection]
+    [publicKey, sendTransaction, connection, step]
   );
 
   useEffect(() => {
