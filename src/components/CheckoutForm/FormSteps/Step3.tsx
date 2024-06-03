@@ -1,7 +1,6 @@
 import React from "react";
 import { ProductVariants, Response } from "../../../models";
 
-
 interface CheckoutItems {
   checkoutData: ProductVariants[];
   response?: Response;
@@ -14,6 +13,10 @@ const Step3: React.FC<CheckoutItems> = ({ checkoutData, response }) => {
     total_tax,
   }: Response): number {
     return total_price + total_shipping + total_tax;
+  }
+
+  if (response === undefined || response === null) {
+    return null;
   }
 
   return (
@@ -38,7 +41,9 @@ const Step3: React.FC<CheckoutItems> = ({ checkoutData, response }) => {
                     )}
                   </div>
                   <div className="flex flex-col text-right gap-1">
-                    <p className="text-gray-400 sm:text-xl text-sm">{node?.title}</p>
+                    <p className="text-gray-400 sm:text-xl text-sm">
+                      {node?.title}
+                    </p>
                     <p className="text-gray-400 sm:text-xl text-sm">
                       Quantity: {node?.quantity}
                     </p>
@@ -57,20 +62,20 @@ const Step3: React.FC<CheckoutItems> = ({ checkoutData, response }) => {
               <span className="font-medium text-gray-950">
                 Total Item Cost:
               </span>{" "}
-              {response?.total_price.toFixed(2)} SOL
+              {response?.total_price?.toFixed(2)} SOL
             </p>
             <p className="text-gray-400 text-xl">
               <span className="font-medium text-gray-950">Shipping Cost:</span>{" "}
-              {response?.total_shipping.toFixed(2)} SOL
+              {response?.total_shipping?.toFixed(2)} SOL
             </p>
             <p className="text-gray-400 text-xl">
               <span className="font-medium text-gray-950">VAT:</span>{" "}
-              {response?.total_tax.toFixed(2)} SOL
+              {response?.total_tax?.toFixed(2)} SOL
             </p>
             <div className="mt-6">
               <p className="font-medium text-gray-950">Total</p>
               <p className="mt-2 text-gray-400">
-                {calculateTotalCost(response).toFixed(2)} SOL
+                {calculateTotalCost(response)?.toFixed(2)} SOL
               </p>
             </div>
           </div>

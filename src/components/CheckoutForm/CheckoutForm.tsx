@@ -123,12 +123,30 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     setCheckoutItems(itemsInCart);
   }, [cartItems]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+
+    // Only apply formatting and constraints to the phone field
+    if (name === "phone") {
+      let formattedValue = value.replace(/\D/g, ""); // Remove non-numeric characters
+      // Limit to maximum of 15 characters
+      formattedValue =
+        formattedValue.length > 15
+          ? formattedValue.substring(0, 15)
+          : formattedValue;
+      // Format phone number
+
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: formattedValue,
+      }));
+    } else {
+      // For other fields, update form state directly
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    }
   };
 
   const renderStep = () => {
@@ -164,6 +182,8 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     }
   };
 
+  console.log("response", response);
+
   const handleNext = async () => {
     if (
       step === 1 &&
@@ -172,8 +192,12 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
       formData?.last_name &&
       formData?.phone
     ) {
-      setStep(step + 1);
-      setValidationMessage("");
+      if (formData?.phone.length < 7) {
+        setValidationMessage("Phone should contains minimum 7 digits");
+      } else {
+        setStep(step + 1);
+        setValidationMessage("");
+      }
     } else if (
       step === 2 &&
       formData?.address1 &&
@@ -208,9 +232,9 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
         console.error("Error:", error);
       } finally {
         setLoading(false);
+        setValidationMessage("");
+        setStep(step + 1);
       }
-      setValidationMessage("");
-      setStep(step + 1);
     } else if (step === 3) {
       setLoading(true);
       try {
@@ -220,7 +244,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
       } catch (error) {
         console.error("Payment error:", error);
         setValidationMessage(
-          "Wallet Not Connected, Please Connect your Wallet to Proceed"
+          "Wallet not connected, Please connect your wallet to proceed."
         );
       } finally {
         setLoading(false);
@@ -228,7 +252,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
     } else if (step === 4) {
       navigate("/");
     } else {
-      setValidationMessage("Please fill all fields to proceed");
+      setValidationMessage("Please fill out all the fields to proceed.");
     }
   };
   const handleback = () => {

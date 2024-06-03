@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
 import Input from "../../Input/Input";
-import { useValidatePhoneNumbers } from "../../../utils";
 import { CheckoutFormData } from "../../../models";
 
 
@@ -15,8 +14,6 @@ const Step1: React.FC<FormComponentProps> = ({
   setFormData,
   handleChange,
 }) => {
-  const phoneNumberRef = useRef(null);
-  useValidatePhoneNumbers([phoneNumberRef]);
 
   return (
     <div className="">
@@ -52,7 +49,6 @@ const Step1: React.FC<FormComponentProps> = ({
               onChange={handleChange}
             />
             <Input
-              ref={phoneNumberRef || null}
               name="phone"
               placeholder="Phone"
               type="tel"
