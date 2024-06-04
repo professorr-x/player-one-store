@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import CartItem from "../CartItem/CartItem";
 import { BsCart4 } from "react-icons/bs";
 
@@ -31,14 +31,17 @@ const CartWidget: React.FC<CartWidgetProps> = ({
     0
   );
 
-  const checkoutData:any = [];
-  for (let i = 0; i < items.length; i++) {
-    checkoutData?.push({
-      productId: items[i]?.productId,
-      variantID: items[i]?.id,
-      quantity: items[i]?.quantity,
-    });
-  }
+  useEffect(() => {
+    const checkoutData: any = [];
+    for (let i = 0; i < items.length; i++) {
+      checkoutData?.push({
+        product_id: items[i]?.productId,
+        variant_id: items[i]?.id,
+        quantity: items[i]?.quantity,
+      });
+    }
+    localStorage.setItem("checkout", JSON.stringify(checkoutData));
+  }, [items]);
 
   return (
     <div className="fixed z-20 inset-0 bg-gray-800 bg-opacity-75 flex justify-end">
@@ -76,12 +79,9 @@ const CartWidget: React.FC<CartWidgetProps> = ({
             <span className="text-gray-400">Subtotal</span>
             <span className="text-yellow-500">{total.toFixed(2)} SOL</span>
           </div>
-          <button
-            onClick={() => console.log(checkoutData)}
-            className="w-full mt-4 py-2 border-2 border-yellow-500 text-white bg-zinc-950 rounded"
-          >
+          <a href="/checkout" className="w-full block text-center cursor-pointer mt-4 py-2 border-2 border-yellow-500 text-white bg-zinc-950 rounded">
             CHECKOUT
-          </button>
+          </a>
         </div>
       </div>
     </div>
