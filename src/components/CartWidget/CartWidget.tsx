@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import CartItem from "../CartItem/CartItem";
 import { BsCart4 } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 interface CartWidgetProps {
   items: Array<{
@@ -79,9 +80,13 @@ const CartWidget: React.FC<CartWidgetProps> = ({
             <span className="text-gray-400">Subtotal</span>
             <span className="text-yellow-500">{total.toFixed(2)} SOL</span>
           </div>
-          <a href="/checkout" className="w-full block text-center cursor-pointer mt-4 py-2 border-2 border-yellow-500 text-white bg-zinc-950 rounded">
-            CHECKOUT
-          </a>
+          <Link to={{
+            pathname: `/checkout`,
+          }}>
+            <div className="w-full block text-center cursor-pointer mt-4 py-2 border-2 border-yellow-500 text-white bg-zinc-950 rounded">
+              CHECKOUT
+            </div>
+        </Link>
         </div>
       </div>
     </div>
