@@ -12,9 +12,10 @@ require("./App.css");
 const App: FC = () => {
   const [cartItems, setCartItems] = useState<ProductVariants[]>([]);
   return (
+    
     <SolanaWalletContext>
-      <Navbar cartItems={cartItems} setCartItems={setCartItems} />
       <BrowserRouter>
+      <Navbar cartItems={cartItems} setCartItems={setCartItems} />
         <Routes>
           <Route path="/" element={<Store />} />
           <Route
@@ -30,8 +31,9 @@ const App: FC = () => {
             }
           />
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
     </SolanaWalletContext>
+    
   );
 };
 
