@@ -1,8 +1,5 @@
-.App {
-  /* min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center; */
+#root {
+  background-color: #fff;
 }
 
 .adjustWallet{
