@@ -8,7 +8,6 @@ function Store() {
 
   useEffect(() => {
     fetchProducts();
-    console.log(products);
   }, [fetchProducts]);
   return (
     <div>

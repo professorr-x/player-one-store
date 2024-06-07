@@ -27,9 +27,6 @@ export interface ProductOptionValue {
 export interface ProductVariants {
   productId: string;
   id: number;
-  sku: number;
-  cost: number;
-  price: number;
   sol_price: number;
   title: string;
   is_available: boolean;
@@ -48,6 +45,7 @@ export interface ProductImage {
   src: string;
   variant_ids: number[];
   position: string;
+  is_default: boolean;
 }
 
 export interface ICartProduct extends Product {
@@ -62,10 +60,6 @@ export interface ICartTotal {
   currencyFormat: string;
 }
 
-export interface GetProductList {
-  current_page: number;
-  data: Product[];
-}
 
 export interface CheckoutFormData {
   first_name: string;

@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { GetProductList, Product } from '../models';
+import { Product } from '../models';
 
 export const getProducts = async () => {
-  let response: GetProductList;
+  let response: Product[];
 
   response = await axios.get(
     `${process.env.REACT_APP_SERVER_URL}/products`, {
@@ -13,9 +13,7 @@ export const getProducts = async () => {
   }
   );
 
-  const { data } = response || [];
-
-  return data;
+  return response;
 };
 
 
