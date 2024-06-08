@@ -28,6 +28,7 @@ export interface ProductOptionValue {
 export interface ProductVariants {
   productId: string;
   id: number;
+  sku: string;
   sol_price: number;
   title: string;
   is_available: boolean;

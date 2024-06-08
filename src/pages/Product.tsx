@@ -223,10 +223,10 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   // Cart
   const handleAddToCart = (newItem: any) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems?.find((item) => item?.id === newItem?.id);
+      const existingItem = prevItems?.find((item) => item?.sku === newItem?.sku);
       if (existingItem) {
         return prevItems?.map((item) =>
-          item?.id === newItem?.id
+          item?.sku === newItem?.sku
             ? { ...item, quantity: item?.quantity + newItem?.quantity }
             : item
         );
