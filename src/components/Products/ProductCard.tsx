@@ -13,10 +13,12 @@ function ProductCard({ product }: IProps) {
         title,
         variants,
         images,
-        selectable_colors
+        selectable_colors,
+        default_images
     } = product;
 
     useEffect(() => {
+        console.log(default_images)
         const imageList: string[] = []
         for (let i = 0; i < images.length; i++) {
             if (images[i].is_default) {
@@ -37,12 +39,23 @@ function ProductCard({ product }: IProps) {
         ));
     };
 
+    const productImage = () => {
+        if (default_images){
+            return (
+                <img className="p-8 rounded-t-lg" src={default_images.front} alt="product image" onMouseOver={e => (e.currentTarget.src = default_images.back)} onMouseOut={e => (e.currentTarget.src = default_images.front)}/>
+            )
+        }
+        return (
+            <img className="p-8 rounded-t-lg" src={images[0].src} alt="product image"/>
+        )
+    }
+
     return (
         <Link to={{
             pathname: `/products/${id}`,
         }}>
             <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow mx-auto my-8">
-                <img className="p-8 rounded-t-lg" src={image} alt="product image" />
+                {productImage()}
                 <div className="px-5 pb-5">
                     <div className="grid grid-cols-10 gap-y-4 mb-4">
                         {renderColors()}

@@ -7,6 +7,7 @@ export interface Product {
   options: ProductOption[];
   selectable_options: SelectableProductOptions;
   selectable_colors: ProductOptionValue[]
+  default_images: any
 }
 
 export interface ProductOption {

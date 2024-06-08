@@ -1,6 +1,6 @@
-import { WalletAdapterNetwork, WalletNotConnectedError } from '@solana/wallet-adapter-base';
-import { ConnectionProvider, WalletProvider, useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 
 import {
     GlowWalletAdapter,
@@ -13,19 +13,20 @@ import {
     TorusWalletAdapter,
 
 } from '@solana/wallet-adapter-wallets';
-import fs from "fs";
 
-import { clusterApiUrl, Transaction, SystemProgram, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import React, { FC, ReactNode, useMemo, useCallback, useState } from 'react';
+import { clusterApiUrl } from '@solana/web3.js';
+import React, { FC, ReactNode, useMemo, } from 'react';
 
-import { actions, utils, programs, NodeWallet, Connection} from '@metaplex/js'; 
 require('@solana/wallet-adapter-react-ui/styles.css');
 export const SolanaWalletContext: FC<{ children: ReactNode }> = ({ children }) => {
     // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
     const network = WalletAdapterNetwork.Devnet;
 
     // You can also provide a custom RPC endpoint.
-    const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+    let endpoint = useMemo(() => clusterApiUrl(network), [network]);
+    if (process.env.REACT_APP_ENV == "prod") {
+        endpoint = `${process.env.REACT_APP_RPC_URL}`
+    }
 
     // @solana/wallet-adapter-wallets includes all the adapters but supports tree shaking and lazy loading --
     // Only the wallets you configure here will be compiled into your application, and only the dependencies
@@ -36,7 +37,7 @@ export const SolanaWalletContext: FC<{ children: ReactNode }> = ({ children }) =
             new PhantomWalletAdapter(),
             new GlowWalletAdapter(),
             new SlopeWalletAdapter(),
-            new SolletExtensionWalletAdapter(), 
+            new SolletExtensionWalletAdapter(),
             new SolletWalletAdapter(),
             new SolflareWalletAdapter({ network }),
             new TorusWalletAdapter(),
@@ -44,7 +45,7 @@ export const SolanaWalletContext: FC<{ children: ReactNode }> = ({ children }) =
         [network]
     );
 
-   
+
 
     return (
         <ConnectionProvider endpoint={endpoint}>
