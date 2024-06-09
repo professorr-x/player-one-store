@@ -82,7 +82,9 @@ const CartWidget: React.FC<CartWidgetProps> = ({
           </div>
           <Link to={{
             pathname: `/checkout`,
-          }}>
+          }}
+          onClick={onClose}
+          >
             <div className="w-full block text-center cursor-pointer mt-4 py-2 border-2 border-yellow-500 text-white bg-zinc-950 rounded">
               CHECKOUT
             </div>
