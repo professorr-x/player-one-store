@@ -204,7 +204,7 @@ const ProductPage: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
         className={`w-6 h-6 rounded-full bg-[${color.colors![0]}] mr-2 ${
           selectedOptions.includes(color.id)
             ? "border-2 border-black"
-            : "border-none"
+            : "border border-gray-500"
         }`}
         onClick={(e) => handleOptionSelect(e, "color")}
       ></button>

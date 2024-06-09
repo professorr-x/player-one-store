@@ -50,6 +50,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const navigate = useNavigate();
+  const [loadingMessage, setLoadingMessage] = useState<String>("")
 
   const handleSolanaPay = useCallback(
     async (response: Response) => {
@@ -205,6 +206,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
       formData?.country &&
       formData?.zip
     ) {
+      setLoadingMessage("Creating checkout order, this might take a short while ...")
       setLoading(true);
       try {
         const data = {
@@ -232,6 +234,7 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
         console.error("Error:", error);
       } finally {
         setLoading(false);
+        setLoadingMessage("")
         setValidationMessage("");
         setStep(step + 1);
       }
@@ -288,7 +291,10 @@ const CheckoutForm: React.FC<cartItem> = ({ setCartItems, cartItems }) => {
             width={100}
             src={loadingSpinner}
             alt="loading spinner"
-          />{" "}
+          />
+          <div>
+            {loadingMessage}
+          </div>
         </div>
       ) : (
         <div className="">

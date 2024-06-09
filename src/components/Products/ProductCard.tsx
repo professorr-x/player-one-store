@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Product } from '../../models';
 import { Link } from "react-router-dom";
 
@@ -7,7 +7,6 @@ interface IProps {
 }
 
 function ProductCard({ product }: IProps) {
-    const [image, setImage] = useState<string>("")
     const {
         id,
         title,
@@ -16,17 +15,6 @@ function ProductCard({ product }: IProps) {
         selectable_colors,
         default_images
     } = product;
-
-    useEffect(() => {
-        console.log(default_images)
-        const imageList: string[] = []
-        for (let i = 0; i < images.length; i++) {
-            if (images[i].is_default) {
-                imageList.push(images[i].src)
-            }
-        }
-        setImage(imageList[Math.floor(Math.random() * imageList.length)])
-    }, [])
 
     const renderColors = () => {
         return selectable_colors?.map((color) => (
